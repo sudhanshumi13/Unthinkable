@@ -138,7 +138,7 @@ This will start the Streamlit server and open the app in your browser.
 <table>
   <tr>
     <td width="50%"><img src="img/RAG_pdf.png" alt="App Image"></td>
-    <td width="50%"><img src="img/RAG-GIF.gif" alt="App GIF"></td>
+    <td width="50%"><img src="img/RAG_App.gif" alt="App GIF"></td>
   </tr>
 </table>
 
