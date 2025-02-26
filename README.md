@@ -1,5 +1,7 @@
 # AI-Powered Document Q&A
 
+![](img/Meta_image_in_computer_animation_style_wide.jpeg)
+
 This is a Streamlit application that allows users to upload a PDF document and ask questions about its content using AI-powered natural language processing (NLP) tools. The app uses Langchain, OpenAI's GPT-4 model, and FAISS (Facebook AI Similarity Search) for document retrieval and question answering.
 
 ## Requirements
@@ -131,12 +133,22 @@ streamlit run app.py
 
 This will start the Streamlit server and open the app in your browser.
 
+## Images
+
+<table>
+  <tr>
+    <td width="50%"><img src="img/RAG_pdf.png" alt="App Image"></td>
+    <td width="50%"><img src="img/RAG-GIF.gif" alt="App GIF"></td>
+  </tr>
+</table>
+
+
 ## License
 This project is licensed under the MIT License.
 
 ## Author
-Gustavo R. Santos<br>
-[Linkedin](https://www.linkedin.com/in/gurezende/)
-[Website](https://gustavorsantos.me)
-[Medium Blog](https://gustavorsantos.medium.com)
+#### Gustavo R. Santos<br>
+[Linkedin](https://www.linkedin.com/in/gurezende/)<br>
+[Website](https://gustavorsantos.me)<br>
+[Medium Blog](https://gustavorsantos.medium.com)<br>
 
