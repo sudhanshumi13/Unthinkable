@@ -36,6 +36,15 @@ The application runs as follows:
 * Creates a vector database for efficient document retrieval using OpenAI embeddings.
 * Use the GPT-4 model to answer questions related to the document.
 
+## Demonstration
+
+<table>
+  <tr>
+    <td width="50%"><img src="img/RAG_pdf.png" alt="App Image"></td>
+    <td width="50%"><img src="img/RAG_App.gif" alt="App GIF"></td>
+  </tr>
+</table>
+
 ## How it Works
 1. Document Upload
 The user can upload a PDF document via the Streamlit interface. The file is saved temporarily on the server, and the document is then processed into text chunks for easier retrieval.
@@ -132,16 +141,6 @@ streamlit run app.py
 ```
 
 This will start the Streamlit server and open the app in your browser.
-
-## Images
-
-<table>
-  <tr>
-    <td width="50%"><img src="img/RAG_pdf.png" alt="App Image"></td>
-    <td width="50%"><img src="img/RAG_App.gif" alt="App GIF"></td>
-  </tr>
-</table>
-
 
 ## License
 This project is licensed under the MIT License.
