@@ -1,4 +1,3 @@
-#%%
 # Imports
 from langchain_community.vectorstores import FAISS
 from langchain_openai import OpenAIEmbeddings
@@ -44,7 +43,7 @@ if uploaded_file :
 
     # Create vector database containing chunks and embeddings
     vector_db = FAISS.from_documents(chunks, embeddings)
-
+    
     # Create a document retriever
     retriever = vector_db.as_retriever()
     llm = ChatOpenAI(model_name="gpt-4o-mini", openai_api_key=OPENAI_KEY)
