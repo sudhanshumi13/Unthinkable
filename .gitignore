@@ -1,13 +1,10 @@
 # Python-generated files
 __pycache__/
 *.py[oc]
-build/
-dist/
-wheels/
-*.egg-info
 
-# Virtual environments
-.venv
-secret.py
-../docs/resume.pdf
+# environments
+.env
+temp_input_file
+*.pdf
+
 

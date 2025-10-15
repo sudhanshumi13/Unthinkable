@@ -1,87 +1,82 @@
-# Imports
 from langchain_community.vectorstores import FAISS
-from langchain_openai import OpenAIEmbeddings
-from langchain.chains import create_retrieval_chain
-from langchain_openai import ChatOpenAI
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain.chains.retrieval import create_retrieval_chain
 from langchain_core.prompts import ChatPromptTemplate
-from scripts.secret import OPENAI_KEY
+from langchain.schema import Document
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from scripts.document_loader import load_document
 import streamlit as st
+from dotenv import load_dotenv
+import os
 
-# Create a Streamlit app
-st.title("AI-Powered Document Q&A")
 
-# Load document to streamlit
-uploaded_file = st.file_uploader("Upload a PDF file", type="pdf")
+load_dotenv()
+st.set_page_config(page_title="Query-Bot", layout="wide")
+st.title("LLM & RAG -Powered Document & Text Q&A")
+st.markdown("""
+Upload a **PDF** or **TXT** file, or paste large text below.  
+Then ask a question and get instant, context-aware answers using LLM model
+""")
 
-# If a file is uploaded, create the TextSplitter and vector database
-if uploaded_file :
+uploaded_file = st.file_uploader("Upload PDF or Text", type=["pdf", "txt"])
+large_text_input = st.text_area("Or paste your text here:", height=200)
 
-    # Code to work around document loader from Streamlit and make it readable by langchain
-    temp_file = "./temp.pdf"
-    with open(temp_file, "wb") as file:
-        file.write(uploaded_file.getvalue())
-        file_name = uploaded_file.name
 
-    # Load document and split it into chunks for efficient retrieval.
+chunks = []
+
+if uploaded_file:
+    temp_file = "./temp_input_file"
+    with open(temp_file, "wb") as f:
+        f.write(uploaded_file.getvalue())
     chunks = load_document(temp_file)
 
-    # Message user that document is being processed with time emoji
-    st.write("Processing document... :watch:")
-
-    # Generate embeddings
-    # Embeddings are numerical vector representations of data, typically used to capture relationships, similarities, 
-    # and meanings in a way that machines can understand. They are widely used in Natural Language Processing (NLP), 
-    # recommender systems, and search engines.
-    embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_KEY,
-                                  model="text-embedding-ada-002")
-    
-    # Can also use HuggingFaceEmbeddings
-    # from langchain_huggingface.embeddings import HuggingFaceEmbeddings
-    # embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-
-    # Create vector database containing chunks and embeddings
-    vector_db = FAISS.from_documents(chunks, embeddings)
-    
-    # Create a document retriever
-    retriever = vector_db.as_retriever()
-    llm = ChatOpenAI(model_name="gpt-4o-mini", openai_api_key=OPENAI_KEY)
-
-    # Create a system prompt
-    # It sets the overall context for the model.
-    # It influences tone, style, and focus before user interaction starts.
-    # Unlike user inputs, a system prompt is not visible to the end user.
-
-    system_prompt = (
-        "You are a helpful assistante. Use the given context to answer the question."
-        "If you don't know the answer, say you don't know. "
-        "{context}"
-    )
-
-    # Create a prompt Template
-    prompt = ChatPromptTemplate.from_messages(
-        [
-            ("system", system_prompt),
-            ("human", "{input}"),
-        ]
-    )
-
-    # Create a chain
-    # It creates a StuffDocumentsChain, which takes multiple documents (text data) and "stuffs" them together before passing them to the LLM for processing.
-    
-    question_answer_chain = create_stuff_documents_chain(llm, prompt)
-    
-    # Creates the RAG
-    # Retrieve relevant documents from a data source (e.g., a vector database) and then process them using an LLM to generate a response.
-    
-    chain = create_retrieval_chain(retriever, question_answer_chain)
+elif large_text_input:
+    doc = Document(page_content=large_text_input)
+    splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+    chunks = splitter.split_documents([doc])
 
 
-    # Streamlit input for question
-    question = st.text_input("Ask a question about the document:")
-    if question:
-        # Answer
+if not chunks:
+    st.warning("Please upload a file or paste some text to continue.")
+    st.stop()
+
+st.info("Processing document/text... ⏳ Please wait a moment.")
+
+
+embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+vector_db = FAISS.from_documents(chunks, embeddings)
+retriever = vector_db.as_retriever(search_kwargs={"k": 3})
+llm = ChatGoogleGenerativeAI(
+    model="gemini-2.5-flash",
+    temperature=0.2,
+    google_api_key=os.getenv("API_KEY")
+)
+
+
+system_prompt = (
+    "You are a helpful AI assistant. Use the provided context to answer questions clearly and concisely. "
+    "If the answer is not available in the context, say 'I don't know.'\n\nContext:\n{context}"
+)
+prompt = ChatPromptTemplate.from_messages([
+    ("system", system_prompt),
+    ("human", "{input}")
+])
+
+
+question_answer_chain = create_stuff_documents_chain(llm, prompt)
+chain = create_retrieval_chain(retriever, question_answer_chain)
+st.markdown("###Ask a Question About the Document/Text")
+question = st.text_input("Type your question below:")
+if question:
+    with st.spinner("🤔 Thinking..."):
         response = chain.invoke({"input": question})['answer']
-        st.write(response)
-    
+    st.markdown("### Answer is here:")
+    st.success(response)
+
+
+st.markdown("""
+---
+Made by Utkarsh Goel
+""")
